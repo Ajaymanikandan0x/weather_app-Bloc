@@ -14,17 +14,21 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
       final data =
           response.data; // Directly access response data (already decoded)
 
+      // Debugging: Print the response data
+      print('Location data response: $data');
+
       if (data['results'].isNotEmpty) {
         // Extract relevant data from each result
         List<Map<String, dynamic>> locations =
             data['results'].map<Map<String, dynamic>>((result) {
+          final components = result['components'];
           return {
             'formatted': result['formatted'],
             'lat': result['geometry']['lat'],
             'lng': result['geometry']['lng'],
-            'city': result['components']['city'],
-            'state': result['components']['state'] ?? '',
-            'country': result['components']['country'],
+            'city': components['city'] ?? components['_normalized_city'] ?? '',
+            'state': components['state'] ?? '',
+            'country': components['country'] ?? '',
           };
         }).toList();
 
@@ -78,7 +82,8 @@ String getWeatherType(int weatherCode) {
       'Unknown'; // Return 'Unknown' if code not found
 }
 
-Future<List<WeatherData>> getWeather(double lat, double lng) async {
+Future<List<WeatherData>> getWeather(
+    double lat, double lng, String cityname) async {
   const String apiKey = 'FPf5H7ASWYlpw3WbZFTe3RYLIUqZNTX7';
   final String url =
       'https://api.tomorrow.io/v4/weather/forecast?location=$lat,$lng&apikey=$apiKey';
@@ -89,13 +94,16 @@ Future<List<WeatherData>> getWeather(double lat, double lng) async {
     if (response.statusCode == 200) {
       final data = response.data;
 
+      // Debugging: Print the response data
+      print('Weather data response: $data');
+
       // Extract the minutely data
       final List<dynamic> minutelyData = data['timelines']['minutely'];
 
       // Map the minutely data to WeatherData objects
       return minutelyData.map<WeatherData>((item) {
         final int weatherCode = item['values']['weatherCode'];
-        return WeatherData.fromJson(item, weatherCode);
+        return WeatherData.fromJson(item, weatherCode, cityname);
       }).toList();
     } else {
       print('Failed to get weather data, status code: ${response.statusCode}');
@@ -107,7 +115,6 @@ Future<List<WeatherData>> getWeather(double lat, double lng) async {
   return [];
 }
 
-//post using retrieve the historical data
 Future<Map<String, dynamic>> getHistoricalData(double lat, double lng) async {
   const String apiKey = 'FPf5H7ASWYlpw3WbZFTe3RYLIUqZNTX7';
   const String url = 'https://api.tomorrow.io/v4/historical?apikey=$apiKey';
@@ -147,15 +154,14 @@ Future<Map<String, dynamic>> getHistoricalData(double lat, double lng) async {
 }
 
 class WeatherData {
-  final String time;
-  final double temperature;
-  final double humidity;
-  final double windSpeed;
-  final double rainIntensity;
-  final String weatherType; 
-  final String sunriseTime;
-  final String sunsetTime; 
-  final double visibilityAvg; 
+  final String time; // Time of the weather data
+  final double temperature; // Current temperature
+  final double humidity; // Current humidity
+  final double windSpeed; // Wind speed
+  final double rainIntensity; // Rain intensity
+  final double visibility; // Visibility
+  final String weatherType; // Weather type based on weather code
+  final String cityName; // Add this line
 
   WeatherData({
     required this.time,
@@ -163,24 +169,32 @@ class WeatherData {
     required this.humidity,
     required this.windSpeed,
     required this.rainIntensity,
-    
+    required this.visibility,
     required this.weatherType,
-    required this.sunriseTime,
-    required this.sunsetTime,
-    required this.visibilityAvg,
+    required this.cityName, // Add this line
   });
 
-  factory WeatherData.fromJson(Map<String, dynamic> json, int weatherCode) {
+  factory WeatherData.fromJson(
+      Map<String, dynamic> json, int weatherCode, String cityName) {
     return WeatherData(
       time: json['time'],
-      temperature: json['values']['temperatureAvg'], 
-      humidity: json['values']['humidityAvg'], 
-      windSpeed: json['values']['windSpeedAvg'], 
-      rainIntensity: json['values']['rainIntensityAvg'], 
-      weatherType: getWeatherType(weatherCode), 
-      sunriseTime: json['values']['sunriseTime'], 
-      sunsetTime: json['values']['sunsetTime'], 
-      visibilityAvg: json['values']['visibilityAvg'], 
+      temperature: (json['values']['temperature'] is int)
+          ? (json['values']['temperature'] as int).toDouble()
+          : (json['values']['temperature'] as double? ?? 0.0),
+      humidity: (json['values']['humidity'] is int)
+          ? (json['values']['humidity'] as int).toDouble()
+          : (json['values']['humidity'] as double? ?? 0.0),
+      windSpeed: (json['values']['windSpeed'] is int)
+          ? (json['values']['windSpeed'] as int).toDouble()
+          : (json['values']['windSpeed'] as double? ?? 0.0),
+      rainIntensity: (json['values']['rainIntensity'] is int)
+          ? (json['values']['rainIntensity'] as int).toDouble()
+          : (json['values']['rainIntensity'] as double? ?? 0.0),
+      visibility: (json['values']['visibility'] is int)
+          ? (json['values']['visibility'] as int).toDouble()
+          : (json['values']['visibility'] as double? ?? 0.0),
+      weatherType: getWeatherType(weatherCode),
+      cityName: cityName, // Add this line
     );
   }
 }

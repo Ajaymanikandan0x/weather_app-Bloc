@@ -12,7 +12,7 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
       try {
         final locations = await getLatLongFromPlace(event.place);
         if (locations.isNotEmpty) {
-          final weatherDataList = await getWeather(locations[0]['lat'], locations[0]['lng']);
+          final weatherDataList = await getWeather(locations[0]['lat'], locations[0]['lng'],locations[0]['city']);
           emit(WeatherSuccess(weatherDataList));
         } else {
           emit(WeatherFailure());
