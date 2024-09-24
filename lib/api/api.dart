@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:temp_tide/api/api_key.dart';
 
 import '../file/city_data.dart';
 import '../file/weather_data/weatherdata.dart';
@@ -6,7 +7,7 @@ import '../file/weather_data/weatherdata.dart';
 final dio = Dio();
 
 Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
-  const String apiKey = '5e8757b129ec4f73b18782ea76a7e8f0';
+  const String apiKey = apiKeyGeoLocate;
   final String url =
       'https://api.opencagedata.com/geocode/v1/json?q=$place&key=$apiKey';
 
@@ -14,8 +15,7 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
     final response = await dio.get(url);
 
     if (response.statusCode == 200) {
-      final data =
-          response.data;
+      final data = response.data;
 
       if (data['results'].isNotEmpty) {
         List<Map<String, dynamic>> locations =
@@ -98,13 +98,12 @@ final Map<int, String> weatherImages = {
 };
 
 String getWeatherType(int weatherCode) {
-  return weatherCodes[weatherCode] ??
-      'Unknown';
+  return weatherCodes[weatherCode] ?? 'Unknown';
 }
 
 Future<List<WeatherData>> getWeather(
     double lat, double lng, String cityname) async {
-  const String apiKey = 'FPf5H7ASWYlpw3WbZFTe3RYLIUqZNTX7';
+  const String apiKey = apiKeyTomorrow;
   final String url =
       'https://api.tomorrow.io/v4/weather/forecast?location=$lat,$lng&apikey=$apiKey';
 
