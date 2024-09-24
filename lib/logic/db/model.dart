@@ -4,31 +4,31 @@ class Model {
   final double temperature; // Current temperature
   final double humidity; // Current humidity
   final double windSpeed; // Wind speed
-  final double rainIntensity; // Rain intensity
   final double visibility; // Visibility
-  final String weatherType;
+  final String weatherType; // Weather type
+  final String imagePath; // Image path
 
   Model(this.cityName, this.time, this.temperature, this.humidity, this.windSpeed,
-      this.rainIntensity, this.visibility, this.weatherType);
+       this.visibility, this.weatherType, this.imagePath);
 
   factory Model.fromMap(Map<String, dynamic> map) => Model(
-      map['cityName'],
-      map['time'],
+      map['name'],
+      map['datetime'],
       map['temperature'],
       map['humidity'],
       map['windSpeed'],
-      map['rainIntensity'],
       map['visibility'],
-      map['weatherType']);
+      map['weatherType'],
+      map['imagePath']);
 
   Map<String, dynamic> toMap() => {
-        'cityName': cityName,
-        'time': time,
+        'name': cityName,
+        'datetime': time,
         'temperature': temperature,
         'humidity': humidity,
         'windSpeed': windSpeed,
-        'rainIntensity': rainIntensity,
         'visibility': visibility,
         'weatherType': weatherType,
+        'imagePath': imagePath,
       };
 }

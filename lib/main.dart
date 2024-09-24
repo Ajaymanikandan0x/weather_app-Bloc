@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:temp_tide/presentation/home/home.dart';
 import 'package:temp_tide/presentation/saved/saved_screen.dart';
 
+import 'logic/current_weather/weather_bloc.dart';
 import 'logic/saved_city_bloc/city_bloc.dart';
-import 'logic/weather_bloc.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
           create: (context) => WeatherBloc(),
         ),
         BlocProvider<CityBloc>(
-          create: (context) => CityBloc(),
+          create: (context) => CityBloc(CityService()),
         ),
       ],
       child: MaterialApp(

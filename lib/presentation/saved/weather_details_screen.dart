@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import '../../api/api.dart';
-import '../../logic/weather_bloc.dart';
 
+import '../../file/weather_data/weatherdata.dart';
 
 class WeatherDetailsScreen extends StatelessWidget {
   final WeatherData weatherData;
 
-  const WeatherDetailsScreen({Key? key, required this.weatherData}) : super(key: key);
+  const WeatherDetailsScreen({Key? key, required this.weatherData})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String formattedDate = '';
+    if (weatherData.time.isNotEmpty) {
+      try {
+        formattedDate = '${DateFormat('hh:mm a').format(DateTime.parse(weatherData.time))} ${DateFormat('dd/MM/yyyy').format(DateTime.parse(weatherData.time))}';
+      } catch (e) {
+        formattedDate = 'Invalid date';
+      }
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -40,8 +49,10 @@ class WeatherDetailsScreen extends StatelessWidget {
             children: [
               Card(
                 color: Colors.white.withOpacity(0.1),
-                margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                margin:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: Column(
@@ -65,12 +76,14 @@ class WeatherDetailsScreen extends StatelessWidget {
                       ),
                       Text(
                         weatherData.weatherType,
-                        style: const TextStyle(color: Colors.white, fontSize: 20),
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 20),
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '${DateFormat('hh:mm a').format(DateTime.parse(weatherData.time))} ${DateFormat('dd/MM/yyyy').format(DateTime.parse(weatherData.time))}',
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        formattedDate,
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
                       ),
                       const SizedBox(height: 20),
                       _buildWeatherDetailsRow(weatherData),
@@ -91,16 +104,20 @@ class WeatherDetailsScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildWeatherDetail('Visibility', '${weatherData.visibility}', 'assets/icons/sun.png'),
-            _buildWeatherDetail('Wind Speed', '${weatherData.windSpeed}', 'assets/icons/night.png'),
+            _buildWeatherDetail('Visibility', '${weatherData.visibility}',
+                'assets/icons/sun.png'),
+            _buildWeatherDetail('Wind Speed', '${weatherData.windSpeed}',
+                'assets/icons/night.png'),
           ],
         ),
         const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildWeatherDetail('Max Temp', '12 °C', 'assets/icons/high-temperature.png'),
-            _buildWeatherDetail('Min Temp', '5 °C', 'assets/icons/temperature.png'),
+            _buildWeatherDetail(
+                'Max Temp', '12 °C', 'assets/icons/high-temperature.png'),
+            _buildWeatherDetail(
+                'Min Temp', '5 °C', 'assets/icons/temperature.png'),
           ],
         ),
       ],
@@ -115,8 +132,12 @@ class WeatherDetailsScreen extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w300)),
-            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w300)),
+            Text(title,
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w300)),
+            Text(value,
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w300)),
           ],
         ),
       ],

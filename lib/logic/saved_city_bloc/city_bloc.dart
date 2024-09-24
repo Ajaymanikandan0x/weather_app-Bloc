@@ -1,108 +1,79 @@
 import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
 
-import '../../api/api.dart'; // Import API functions
 import '../../file/city_data.dart';
-import '../../logic/db/db.dart';
-import '../db/model.dart'; 
+import 'city_event.dart';
+import 'city_state.dart';
+import '../../api/api.dart'; // Import the API functions
 
-part 'city_event.dart';
-part 'city_state.dart';
+class CityService {
+  Future<void> addCity(String name) async {
+    final latLong = await getLatLongFromPlace(name);
+    if (latLong.isNotEmpty) {
+      final weatherData = await getWeather(latLong[0]['lat'], latLong[0]['lng'], name);
+      if (weatherData.isNotEmpty) {
+        final latestWeather = weatherData.first;
+        print('Latest weather data: $latestWeather'); // Debug print
+        await saveCity(
+          name,
+          latestWeather.time,
+          latestWeather.temperature,
+          latestWeather.humidity,
+          latestWeather.windSpeed,
+          latestWeather.visibility,
+          latestWeather.weatherType,
+          latestWeather.imagePath,
+        );
+      }
+    }
+  }
+
+  Future<List<City>> getCities() async {
+    final weatherDataList = await fetchCitiesFromAPI();
+    print('Fetched weather data list: $weatherDataList'); // Debug print
+    return weatherDataList.map((weatherData) => City(
+      name: weatherData.cityName,
+      weatherData: weatherData,
+    )).toList();
+  }
+
+  Future<void> deleteCityByName(String cityName) async {
+    await deleteCityFromAPI(cityName);
+  }
+}
 
 class CityBloc extends Bloc<CityEvent, CityState> {
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final CityService cityService;
 
-  CityBloc() : super(CityInitial()) {
-    on<FetchCities>((event, emit) async {
-      emit(CityLoading());
+  CityBloc(this.cityService) : super(CityInitial()) {
+    on<AddCity>((event, emit) async {
       try {
-        final cities = await fetchCities();
-        final cityList = cities.map((city) => City(name: city.cityName, weatherData: city)).toList();
-        emit(CityLoaded(cities: cityList));
-      } catch (e) {
-        emit(CityError(error: e.toString()));
+        emit(CityLoading());
+        await cityService.addCity(event.name);
+        final cities = await cityService.getCities();
+        emit(CityLoaded(cities));
+      } catch (error) {
+        emit(CityError(error.toString()));
       }
     });
 
-    on<UpdateCityWeather>((event, emit) async {
-      emit(CityLoading());
+    on<FetchCities>((event, emit) async {
       try {
-        final updatedCity = await fetchCityWeather(event.cityName);
-        final currentState = state;
-        if (currentState is CityLoaded) {
-          final updatedCities = currentState.cities.map((city) {
-            return city.name == event.cityName ? updatedCity : city;
-          }).toList();
-          emit(CityLoaded(cities: updatedCities));
-        }
-      } catch (e) {
-        emit(CityError(error: e.toString()));
+        emit(CityLoading());
+        final cities = await cityService.getCities();
+        emit(CityLoaded(cities));
+      } catch (error) {
+        emit(CityError(error.toString()));
       }
     });
 
     on<DeleteCityByName>((event, emit) async {
-      final currentState = state;
-      if (currentState is CityLoaded) {
-        final updatedCities = currentState.cities.where((city) => city.name != event.cityName).toList();
-        await _databaseHelper.deleteCityByName(event.cityName);
-        emit(CityLoaded(cities: updatedCities));
-      }
-    });
-
-    on<SaveCityWeather>((event, emit) async {
       try {
-        final model = Model(
-          event.weatherData.cityName,
-          event.weatherData.time,
-          event.weatherData.temperature,
-          event.weatherData.humidity,
-          event.weatherData.windSpeed,
-          event.weatherData.rainIntensity,
-          event.weatherData.visibility,
-          event.weatherData.weatherType,
-        );
-
-        await _databaseHelper.insertCity(model);
-        final currentState = state;
-        if (currentState is CityLoaded) {
-          final updatedCities = List<City>.from(currentState.cities)
-            ..add(City(name: model.cityName, weatherData: model));
-          emit(CityLoaded(cities: updatedCities));
-        } else {
-          emit(CityLoaded(cities: [City(name: model.cityName, weatherData: model)]));
-        }
+        await cityService.deleteCityByName(event.cityName);
+        final cities = await cityService.getCities();
+        emit(CityLoaded(cities));
       } catch (e) {
-        emit(CityError(error: e.toString()));
+        emit(CityError(e.toString()));
       }
     });
-  }
-
-  Future<City> fetchCityWeather(String cityName) async {
-    final locations = await getLatLongFromPlace(cityName);
-    if (locations.isNotEmpty) {
-      final lat = locations[0]['lat'];
-      final lng = locations[0]['lng'];
-      final city = locations[0]['city'];
-      List<WeatherData> weatherDataList = await getWeather(lat, lng, city);
-      if (weatherDataList.isNotEmpty) {
-        final weatherData = weatherDataList[0];
-        final model = Model(
-          weatherData.cityName,
-          weatherData.time,
-          weatherData.temperature,
-          weatherData.humidity,
-          weatherData.windSpeed,
-          weatherData.rainIntensity,
-          weatherData.visibility,
-          weatherData.weatherType,
-        );
-        return City(name: cityName, weatherData: model);
-      }
-    }
-    throw Exception('Weather data not found for $cityName');
-  }
-
-  Future<List<Model>> fetchCities() async {
-    return await _databaseHelper.getCity();
   }
 }

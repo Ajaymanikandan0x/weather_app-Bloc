@@ -1,8 +1,11 @@
-import '../logic/db/model.dart';
+import 'weather_data/weatherdata.dart';
 
 class City {
   final String name;
-  final Model weatherData; // Use Model instead of WeatherData
+  final WeatherData weatherData;
 
-  City({required this.name, required this.weatherData}); // Ensure Model is used
+  City({
+    required this.name,
+    required this.weatherData,
+  });
 }

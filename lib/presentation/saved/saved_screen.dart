@@ -5,7 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:temp_tide/logic/saved_city_bloc/city_bloc.dart';
-import '../../api/api.dart';
+
+import '../../file/weather_data/weatherdata.dart';
+import '../../logic/saved_city_bloc/city_event.dart';
+import '../../logic/saved_city_bloc/city_state.dart';
 import 'weather_details_screen.dart';
 
 class SavedScreen extends StatelessWidget {
@@ -96,9 +99,14 @@ class SavedScreen extends StatelessWidget {
                     itemCount: state.cities.length,
                     itemBuilder: (context, index) {
                       final city = state.cities[index];
-                      final formattedDate = DateFormat('EEEE dd •')
-                          .add_jm()
-                          .format(DateTime.parse(city.weatherData.time));
+                      String formattedDate = '';
+                      if (city.weatherData.time.isNotEmpty) {
+                        try {
+                          formattedDate = DateFormat('EEEE dd •').add_jm().format(DateTime.parse(city.weatherData.time));
+                        } catch (e) {
+                          formattedDate = 'Invalid date';
+                        }
+                      }
 
                       return Card(
                         color:
@@ -143,7 +151,7 @@ class SavedScreen extends StatelessWidget {
                               temperature: city.weatherData.temperature,
                               humidity: city.weatherData.humidity,
                               windSpeed: city.weatherData.windSpeed,
-                              rainIntensity: city.weatherData.rainIntensity,
+                              imagePath: city.weatherData.imagePath,
                               visibility: city.weatherData.visibility,
                               weatherType: city.weatherData.weatherType,
                               cityName: city.weatherData.cityName,

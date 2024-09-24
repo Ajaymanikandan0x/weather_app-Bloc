@@ -1,23 +1,28 @@
-part of 'city_bloc.dart';
+import '../../file/city_data.dart';
 
-@immutable
-sealed class CityState {}
+abstract class CityState {
+  @override
+  List<Object> get props => [];
+}
 
-final class CityInitial extends CityState {}
+class CityInitial extends CityState {}
 
-final class CityLoading extends CityState {}
+class CityLoading extends CityState {}
 
-final class CityLoaded extends CityState {
+class CityLoaded extends CityState {
   final List<City> cities;
 
-  CityLoaded({required this.cities});
+  CityLoaded(this.cities);
+
+  @override
+  List<Object> get props => [cities];
 }
 
-final class CityError extends CityState {
+class CityError extends CityState {
   final String error;
 
-  CityError({required this.error});
+  CityError(this.error);
+
+  @override
+  List<Object> get props => [error];
 }
-
-final class CitySaved extends CityState {} // Define CitySaved state
-

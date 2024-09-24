@@ -1,24 +1,23 @@
-part of 'city_bloc.dart';
+abstract class CityEvent {
+  List<Object> get props => [];
+}
 
-@immutable
-sealed class CityEvent {}
+class AddCity extends CityEvent {
+  final String name;
 
-class FetchCities extends CityEvent {}
+  AddCity(this.name);
 
-class UpdateCityWeather extends CityEvent {
-  final String cityName;
-
-  UpdateCityWeather(this.cityName);
+  @override
+  List<Object> get props => [name];
 }
 
 class DeleteCityByName extends CityEvent {
   final String cityName;
 
   DeleteCityByName(this.cityName);
+
+  @override
+  List<Object> get props => [cityName];
 }
 
-class SaveCityWeather extends CityEvent {
-  final WeatherData weatherData; // Change to WeatherData
-
-  SaveCityWeather(this.weatherData);
-}
+class FetchCities extends CityEvent {}

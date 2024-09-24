@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-import '../../api/api.dart';
+import '../../file/weather_data/weatherdata.dart';
+import '../../logic/current_weather/weather_bloc.dart';
 import '../../logic/saved_city_bloc/city_bloc.dart';
-import '../../logic/weather_bloc.dart';
+import '../../logic/saved_city_bloc/city_event.dart';
+import '../../logic/saved_city_bloc/city_state.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
@@ -13,6 +15,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<CityBloc>().add(FetchCities());
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context),
@@ -71,7 +74,9 @@ class Home extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.favorite),
+          icon: const Icon(Icons.favorite, size: 30), // Ensure it's big enough
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
           onPressed: () {
             Navigator.pushNamed(context, '/saved');
           },
@@ -92,53 +97,61 @@ class Home extends StatelessWidget {
 
   Widget _buildWeatherContent(BuildContext context, WeatherData weatherData) {
     return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Card(
-            color: Colors.white.withOpacity(0.1),
-            margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  _buildCityRow(context, weatherData),
-                  const SizedBox(height: 10),
-                  Image.asset('assets/icons/clear-sky.png', height: 100),
-                  Text(
-                    '${weatherData.temperature} °C',
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    weatherData.weatherType,
-                    style: const TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${DateFormat('hh:mm a').format(DateTime.parse(weatherData.time))} ${DateFormat('dd/MM/yyyy').format(DateTime.parse(weatherData.time))}',
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildWeatherDetailsRow(weatherData),
-                  const SizedBox(height: 20),
-                  _buildFavoriteIcon(context, weatherData),
-                ],
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 80, 8, 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Card(
+              color: Colors.white.withOpacity(0.1),
+              margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildCityRow(context, weatherData),
+                        _buildFavoriteIcon(context, weatherData),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Image.asset(weatherData.imagePath, height: 100),
+                    Text(
+                      '${weatherData.temperature} °C',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      weatherData.weatherType,
+                      style: const TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      '${DateFormat('hh:mm a').format(DateTime.parse(weatherData.time))} ${DateFormat('dd/MM/yyyy').format(DateTime.parse(weatherData.time))}',
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildWeatherDetailsRow(weatherData),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCityRow(BuildContext context, WeatherData weatherData) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           weatherData.cityName,
@@ -155,21 +168,28 @@ class Home extends StatelessWidget {
   Widget _buildFavoriteIcon(BuildContext context, WeatherData weatherData) {
     return BlocBuilder<CityBloc, CityState>(
       builder: (context, cityState) {
+        print('CityState: $cityState'); // Debug print
         if (cityState is CityLoaded) {
-          final isSaved = cityState.cities.any(
-              (city) => city.weatherData.cityName == weatherData.cityName);
-          return IconButton(
-            icon: Icon(
-              isSaved ? Icons.favorite : Icons.favorite_border,
-              color: Colors.white,
+          final isSaved = cityState.cities
+              .any((city) => city.weatherData.cityName == weatherData.cityName);
+          return Padding(
+            padding: const EdgeInsets.all(8.0), // Added padding
+            child: IconButton(
+              icon: Icon(
+                isSaved ? Icons.favorite : Icons.favorite_border,
+                color: Colors.red,
+                size: 30, // Ensure the size is noticeable
+              ),
+              onPressed: () {
+                if (isSaved) {
+                  context
+                      .read<CityBloc>()
+                      .add(DeleteCityByName(weatherData.cityName));
+                } else {
+                  context.read<CityBloc>().add(AddCity(weatherData.cityName));
+                }
+              },
             ),
-            onPressed: () {
-              if (isSaved) {
-                context.read<CityBloc>().add(DeleteCityByName(weatherData.cityName));
-              } else {
-                context.read<CityBloc>().add(SaveCityWeather(weatherData));
-              }
-            },
           );
         }
         return Container();
@@ -180,24 +200,31 @@ class Home extends StatelessWidget {
   Widget _buildWeatherDetailsRow(WeatherData weatherData) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildWeatherDetail('Visibility', '${weatherData.visibility}',
-                'assets/icons/sun.png'),
-            _buildWeatherDetail('Wind Speed', '${weatherData.windSpeed}',
-                'assets/icons/night.png'),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildWeatherDetail('Visibility', '${weatherData.visibility}',
+                  'assets/icons/sun.png'),
+              _buildWeatherDetail('Wind Speed', '${weatherData.windSpeed}',
+                  'assets/icons/night.png'),
+              // _buildWeatherDetail('Humidity', '${weatherData.humidity}%', 'assets/icons/humidity.png'),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildWeatherDetail(
-                'Max Temp', '12 °C', 'assets/icons/high-temperature.png'),
-            _buildWeatherDetail(
-                'Min Temp', '5 °C', 'assets/icons/temperature.png'),
-          ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildWeatherDetail(
+                  'Max Temp', '12 °C', 'assets/icons/high-temperature.png'),
+              _buildWeatherDetail(
+                  'Min Temp', '5 °C', 'assets/icons/temperature.png'),
+            ],
+          ),
         ),
       ],
     );

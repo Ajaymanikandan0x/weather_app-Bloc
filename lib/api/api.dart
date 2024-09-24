@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../file/weather_data/weatherdata.dart';
+
 final dio = Dio();
 
 Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
@@ -77,6 +79,32 @@ final Map<int, String> weatherCodes = {
   8000: 'Thunderstorm',
 };
 
+final Map<int, String> weatherImages = {
+  1000: 'assets/icons/clear-sky.png',
+  1100: 'assets/icons/sunny.png',
+  1101: 'assets/icons/cloud.png',
+  1102: 'assets/icons/cloudy.png',
+  1001: 'assets/icons/cloudy.png',
+  2000: 'assets/icons/fog.png',
+  2100: 'assets/icons/fog.png',
+  4000: 'assets/icons/drizzle.png',
+  4001: 'assets/icons/rain.png',
+  4200: 'assets/icons/heavy-rain.png',
+  4201: 'assets/icons/heavy-rain1.png',
+  5000: 'assets/icons/snow.png',
+  5001: 'assets/icons/flurries.png',
+  5100: 'assets/icons/snowflakes.png',
+  5101: 'assets/icons/snow.png',
+  6000: 'assets/icons/drizzle.png',
+  6001: 'assets/icons/freezing-rain.png',
+  6200: 'assets/icons/freezing-rain.png',
+  6201: 'assets/icons/freezing.png',
+  7000: 'assets/icons/winter.png',
+  7101: 'assets/icons/winter.png',
+  7102: 'assets/icons/winter.png',
+  8000: 'assets/icons/thunderstorm.png',
+};
+
 String getWeatherType(int weatherCode) {
   return weatherCodes[weatherCode] ??
       'Unknown'; // Return 'Unknown' if code not found
@@ -115,86 +143,81 @@ Future<List<WeatherData>> getWeather(
   return [];
 }
 
-Future<Map<String, dynamic>> getHistoricalData(double lat, double lng) async {
-  const String apiKey = 'FPf5H7ASWYlpw3WbZFTe3RYLIUqZNTX7';
-  const String url = 'https://api.tomorrow.io/v4/historical?apikey=$apiKey';
+// Replace 'localhost' with '10.0.2.2' if running on an Android emulator
+const String baseUrl = 'http://10.0.2.2:50768';
 
-  final Map<String, dynamic> requestData = {
-    "location": [lat, lng],
-    "fields": ["temperature", "humidity"], // example fields
-    "timesteps": ["1h"], // hourly data as an example
-    "startTime": "2019-03-20T14:09:50Z",
-    "endTime": "2019-03-28T14:09:50Z",
-    "units": "metric",
-    "timezone": "America/New_York"
-  };
+Future<void> saveCity(
+    String name,
+    String datetime,
+    double temperature,
+    double humidity,
+    double windSpeed,
+    double visibility,
+    String weatherType,
+    String imagePath) async {
+  final String url = '$baseUrl/addCity'; // Adjust the URL as needed
 
   try {
-    final response = await dio.post(
-      url,
-      data: requestData,
-      options: Options(
-        headers: {
-          'Accept-Encoding': 'gzip',
-          'accept': 'application/json',
-          'content-type': 'application/json',
-        },
-      ),
-    );
+    final response = await dio.post(url, data: {
+      'name': name,
+      'datetime': datetime,
+      'temperature': temperature,
+      'humidity': humidity,
+      'windSpeed': windSpeed,
+      'visibility': visibility,
+      'weatherType': weatherType,
+      'imagePath': imagePath,
+    });
 
     if (response.statusCode == 200) {
-      return response.data; // Return the weather data
+      print('City saved successfully');
     } else {
-      print('Failed to fetch data. Status code: ${response.statusCode}');
+      print('Failed to save city, status code: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error: $e');
+    print('Error saving city: $e');
   }
-  return {}; // Return an empty map if there's an error
 }
 
-class WeatherData {
-  final String time; // Time of the weather data
-  final double temperature; // Current temperature
-  final double humidity; // Current humidity
-  final double windSpeed; // Wind speed
-  final double rainIntensity; // Rain intensity
-  final double visibility; // Visibility
-  final String weatherType; // Weather type based on weather code
-  final String cityName; // Add this line
+Future<List<WeatherData>> fetchCitiesFromAPI() async {
+  final String url = '$baseUrl/getCities'; 
 
-  WeatherData({
-    required this.time,
-    required this.temperature,
-    required this.humidity,
-    required this.windSpeed,
-    required this.rainIntensity,
-    required this.visibility,
-    required this.weatherType,
-    required this.cityName, // Add this line
-  });
+  try {
+    final response = await dio.get(url);
 
-  factory WeatherData.fromJson(
-      Map<String, dynamic> json, int weatherCode, String cityName) {
-    return WeatherData(
-      time: json['time'],
-      temperature: (json['values']['temperature'] is int)
-          ? (json['values']['temperature'] as int).toDouble()
-          : (json['values']['temperature'] as double? ?? 0.0),
-      humidity: (json['values']['humidity'] is int)
-          ? (json['values']['humidity'] as int).toDouble()
-          : (json['values']['humidity'] as double? ?? 0.0),
-      windSpeed: (json['values']['windSpeed'] is int)
-          ? (json['values']['windSpeed'] as int).toDouble()
-          : (json['values']['windSpeed'] as double? ?? 0.0),
-      rainIntensity: (json['values']['rainIntensity'] is int)
-          ? (json['values']['rainIntensity'] as int).toDouble()
-          : (json['values']['rainIntensity'] as double? ?? 0.0),
-      visibility: (json['values']['visibility'] is int)
-          ? (json['values']['visibility'] as int).toDouble()
-          : (json['values']['visibility'] as double? ?? 0.0),
-      weatherType: getWeatherType(weatherCode),
-      cityName: cityName, // Add this line
-    );
+    if (response.statusCode == 200) {
+      final List<dynamic>? data = response.data;
+      if (data != null) {
+        return data.map<WeatherData>((item) {
+          final weatherCode = item['weatherCode'] ?? 0;
+          final cityName = item['name'] ?? '';
+          return WeatherData.fromJson(item, weatherCode, cityName);
+        }).toList();
+      } else {
+        print('No data found in the response');
+      }
+    } else {
+      print('Failed to fetch cities, status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching cities: $e');
+  }
+
+  return [];
+}
+
+Future<void> deleteCityFromAPI(String cityName) async {
+  final String url = '$baseUrl/deleteCity/$cityName'; // Adjust the URL as needed
+
+  try {
+    final response = await dio.delete(url);
+
+    if (response.statusCode == 200) {
+      print('City deleted successfully');
+    } else {
+      print('Failed to delete city, status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error deleting city: $e');
   }
 }
