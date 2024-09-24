@@ -21,7 +21,7 @@ class Home extends StatelessWidget {
       appBar: _buildAppBar(context),
       body: Stack(
         children: [
-          _buildBackgroundDecoration(), // Now this will wrap the background in a Container
+          _buildBackgroundDecoration(),
           BlocBuilder<WeatherBloc, WeatherState>(
             builder: (context, state) {
               if (state is WeatherLoading) {
@@ -37,6 +37,7 @@ class Home extends StatelessWidget {
                           style: TextStyle(color: Colors.white)));
                 }
                 final weatherData = state.weatherDataList.first;
+                print('Weather data: $weatherData');
                 return _buildWeatherContent(context, weatherData);
               }
               return const Center(
@@ -72,9 +73,8 @@ class Home extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.favorite, size: 30), // Ensure it's big enough
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16.0), // Added padding
+          icon: const Icon(Icons.favorite, size: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           onPressed: () {
             Navigator.pushNamed(context, '/saved');
           },
@@ -83,7 +83,6 @@ class Home extends StatelessWidget {
     );
   }
 
-  /// Wrap the background decoration in a Container
   Widget _buildBackgroundDecoration() {
     return Container(
       decoration: BoxDecoration(
@@ -103,7 +102,6 @@ class Home extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // City Name and Time
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -115,7 +113,7 @@ class Home extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                _buildFavoriteIcon(context, weatherData), // Added favorite icon
+                _buildFavoriteIcon(context, weatherData),
               ],
             ),
             const SizedBox(height: 5),
@@ -127,7 +125,6 @@ class Home extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            // Weather Icon and Temperature
             Image.asset(
               weatherData.imagePath,
               height: 120,
@@ -149,7 +146,6 @@ class Home extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-            // Hourly Weather Details (Scrollable)
             _buildHourlyWeather(),
           ],
         ),
@@ -160,23 +156,20 @@ class Home extends StatelessWidget {
   Widget _buildFavoriteIcon(BuildContext context, WeatherData weatherData) {
     return BlocBuilder<CityBloc, CityState>(
       builder: (context, cityState) {
-        print('CityState: $cityState'); // Debug print
         if (cityState is CityLoaded) {
           final isSaved = cityState.cities
               .any((city) => city.weatherData.cityName == weatherData.cityName);
           return Padding(
-            padding: const EdgeInsets.all(8.0), // Added padding
+            padding: const EdgeInsets.all(8.0),
             child: IconButton(
               icon: Icon(
                 isSaved ? Icons.favorite : Icons.favorite_border,
                 color: Colors.red,
-                size: 30, // Ensure the size is noticeable
+                size: 30,
               ),
               onPressed: () {
                 if (isSaved) {
-                  context
-                      .read<CityBloc>()
-                      .add(DeleteCityByName(weatherData.cityName));
+                  context.read<CityBloc>().add(DeleteCityByName(weatherData.cityName));
                 } else {
                   context.read<CityBloc>().add(AddCity(weatherData.cityName));
                 }
@@ -207,17 +200,15 @@ class Home extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: List.generate(6, (index) {
-                // Sample hourly data, replace with actual data
-                final time =
-                    ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM'][index];
+                final time = ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM'][index];
                 final temp = [18, 19, 24, 25, 26, 27][index];
-                final icon = Icons.wb_sunny;
+                const icon = Icons.wb_sunny;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: Column(
                     children: [
-                      Icon(icon, color: Colors.white, size: 40),
+                      const Icon(icon, color: Colors.white, size: 40),
                       const SizedBox(height: 5),
                       Text(
                         '$temp°',

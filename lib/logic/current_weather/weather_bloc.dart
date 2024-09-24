@@ -16,11 +16,13 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
         if (locations.isNotEmpty) {
           final weatherDataList = await getWeather(
               locations[0]['lat'], locations[0]['lng'], locations[0]['city']);
+          print('Weather data list: $weatherDataList'); // Debug print
           emit(WeatherSuccess(weatherDataList));
         } else {
           emit(WeatherFailure());
         }
       } catch (e) {
+        print('Error in WeatherBloc: $e'); // Debug print
         emit(WeatherFailure());
       }
     });

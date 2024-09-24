@@ -15,13 +15,9 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
 
     if (response.statusCode == 200) {
       final data =
-          response.data; // Directly access response data (already decoded)
-
-      // Debugging: Print the response data
-      print('Location data response: $data');
+          response.data;
 
       if (data['results'].isNotEmpty) {
-        // Extract relevant data from each result
         List<Map<String, dynamic>> locations =
             data['results'].map<Map<String, dynamic>>((result) {
           final components = result['components'];
@@ -48,11 +44,6 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
 
   return [];
 }
-
-// Weather codes from Tomorrow.io API (examples):
-// 1000: Clear, 1100: Mostly Clear, 1101: Partly Cloudy, 1102: Mostly Cloudy,
-// 2000: Fog, 2100: Light Fog, 4000: Drizzle, 4001: Rain, 4200: Light Rain,
-// 5000: Snow, 6000: Freezing Drizzle, 6001: Freezing Rain
 
 final Map<int, String> weatherCodes = {
   1000: 'Clear, Sunny',
@@ -108,7 +99,7 @@ final Map<int, String> weatherImages = {
 
 String getWeatherType(int weatherCode) {
   return weatherCodes[weatherCode] ??
-      'Unknown'; // Return 'Unknown' if code not found
+      'Unknown';
 }
 
 Future<List<WeatherData>> getWeather(
@@ -123,13 +114,8 @@ Future<List<WeatherData>> getWeather(
     if (response.statusCode == 200) {
       final data = response.data;
 
-      // Debugging: Print the response data
-      print('Weather data response: $data');
-
-      // Extract the minutely data
       final List<dynamic> minutelyData = data['timelines']['minutely'];
 
-      // Map the minutely data to WeatherData objects
       return minutelyData.map<WeatherData>((item) {
         final int weatherCode = item['values']['weatherCode'];
         return WeatherData.fromJson(item, weatherCode, cityname);
@@ -144,7 +130,6 @@ Future<List<WeatherData>> getWeather(
   return [];
 }
 
-// Replace 'localhost' with '10.0.2.2' if running on an Android emulator
 const String baseUrl = 'http://10.0.2.2:50768';
 
 Future<void> saveCity(
@@ -156,7 +141,7 @@ Future<void> saveCity(
     double visibility,
     String weatherType,
     String imagePath) async {
-  final String url = '$baseUrl/addCity'; // Adjust the URL as needed
+  final String url = '$baseUrl/addCity';
 
   try {
     final response = await dio.post(url, data: {
@@ -218,7 +203,7 @@ Future<List<City>> fetchCitiesFromAPI() async {
 }
 
 Future<void> deleteCityFromAPI(String cityName) async {
-  final String url = '$baseUrl/deleteCity/$cityName'; // Adjust the URL as needed
+  final String url = '$baseUrl/deleteCity/$cityName';
 
   try {
     final response = await dio.delete(url);
