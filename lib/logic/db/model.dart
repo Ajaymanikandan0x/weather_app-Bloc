@@ -1,4 +1,4 @@
-class Model {
+class Modell {
   final String cityName; // City name
   final String time; // Time of the weather data
   final double temperature; // Current temperature
@@ -8,10 +8,10 @@ class Model {
   final String weatherType; // Weather type
   final String imagePath; // Image path
 
-  Model(this.cityName, this.time, this.temperature, this.humidity, this.windSpeed,
+  Modell(this.cityName, this.time, this.temperature, this.humidity, this.windSpeed,
        this.visibility, this.weatherType, this.imagePath);
 
-  factory Model.fromMap(Map<String, dynamic> map) => Model(
+  factory Modell.fromMap(Map<String, dynamic> map) => Modell(
       map['name'],
       map['datetime'],
       map['temperature'],

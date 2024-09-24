@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../file/city_data.dart';
 import '../file/weather_data/weatherdata.dart';
 
 final dio = Dio();
@@ -179,8 +180,8 @@ Future<void> saveCity(
   }
 }
 
-Future<List<WeatherData>> fetchCitiesFromAPI() async {
-  final String url = '$baseUrl/getCities'; 
+Future<List<City>> fetchCitiesFromAPI() async {
+  final String url = '$baseUrl/getCities';
 
   try {
     final response = await dio.get(url);
@@ -188,10 +189,20 @@ Future<List<WeatherData>> fetchCitiesFromAPI() async {
     if (response.statusCode == 200) {
       final List<dynamic>? data = response.data;
       if (data != null) {
-        return data.map<WeatherData>((item) {
-          final weatherCode = item['weatherCode'] ?? 0;
-          final cityName = item['name'] ?? '';
-          return WeatherData.fromJson(item, weatherCode, cityName);
+        return data.map<City>((item) {
+          return City(
+            name: item['name'],
+            weatherData: WeatherData(
+              cityName: item['name'],
+              temperature: item['temperature'].toDouble(),
+              weatherType: item['weatherType'],
+              time: item['datetime'],
+              visibility: item['visibility'].toDouble(),
+              windSpeed: item['windSpeed'].toDouble(),
+              humidity: item['humidity'].toDouble(),
+              imagePath: item['imagePath'],
+            ),
+          );
         }).toList();
       } else {
         print('No data found in the response');

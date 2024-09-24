@@ -66,7 +66,7 @@ class WeatherDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Image.asset('assets/icons/clear-sky.png', height: 100),
+                      Image.asset(weatherData.imagePath, height: 100), // Use the correct image path
                       Text(
                         '${weatherData.temperature} °C',
                         style: const TextStyle(

@@ -19,12 +19,10 @@ class Home extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context),
-      body: Container(
-        decoration: _buildBackgroundDecoration(),
-        padding: const EdgeInsets.all(10),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: BlocBuilder<WeatherBloc, WeatherState>(
+      body: Stack(
+        children: [
+          _buildBackgroundDecoration(), // Now this will wrap the background in a Container
+          BlocBuilder<WeatherBloc, WeatherState>(
             builder: (context, state) {
               if (state is WeatherLoading) {
                 return const Center(child: CircularProgressIndicator());
@@ -46,7 +44,7 @@ class Home extends StatelessWidget {
                       style: TextStyle(color: Colors.white)));
             },
           ),
-        ),
+        ],
       ),
     );
   }
@@ -85,12 +83,15 @@ class Home extends StatelessWidget {
     );
   }
 
-  BoxDecoration _buildBackgroundDecoration() {
-    return BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.blueGrey[900]!, Colors.black],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
+  /// Wrap the background decoration in a Container
+  Widget _buildBackgroundDecoration() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blueGrey[900]!, Colors.black],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
       ),
     );
   }
@@ -100,68 +101,59 @@ class Home extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 80, 8, 20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Card(
-              color: Colors.white.withOpacity(0.1),
-              margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildCityRow(context, weatherData),
-                        _buildFavoriteIcon(context, weatherData),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Image.asset(weatherData.imagePath, height: 100),
-                    Text(
-                      '${weatherData.temperature} °C',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      weatherData.weatherType,
-                      style: const TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${DateFormat('hh:mm a').format(DateTime.parse(weatherData.time))} ${DateFormat('dd/MM/yyyy').format(DateTime.parse(weatherData.time))}',
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildWeatherDetailsRow(weatherData),
-                    const SizedBox(height: 20),
-                  ],
+            // City Name and Time
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  weatherData.cityName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
+                _buildFavoriteIcon(context, weatherData), // Added favorite icon
+              ],
+            ),
+            const SizedBox(height: 5),
+            Text(
+              DateFormat('hh:mm a').format(DateTime.parse(weatherData.time)),
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 18,
               ),
             ),
+            const SizedBox(height: 30),
+            // Weather Icon and Temperature
+            Image.asset(
+              weatherData.imagePath,
+              height: 120,
+            ),
+            Text(
+              '${weatherData.temperature}°',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 80,
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              weatherData.weatherType,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 24,
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Hourly Weather Details (Scrollable)
+            _buildHourlyWeather(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCityRow(BuildContext context, WeatherData weatherData) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          weatherData.cityName,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
     );
   }
 
@@ -197,56 +189,53 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _buildWeatherDetailsRow(WeatherData weatherData) {
-    return Column(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildWeatherDetail('Visibility', '${weatherData.visibility}',
-                  'assets/icons/sun.png'),
-              _buildWeatherDetail('Wind Speed', '${weatherData.windSpeed}',
-                  'assets/icons/night.png'),
-              // _buildWeatherDetail('Humidity', '${weatherData.humidity}%', 'assets/icons/humidity.png'),
-            ],
+  Widget _buildHourlyWeather() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'Hourly Forecast',
+            style: TextStyle(color: Colors.white70, fontSize: 18),
           ),
-        ),
-        const SizedBox(height: 20),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildWeatherDetail(
-                  'Max Temp', '12 °C', 'assets/icons/high-temperature.png'),
-              _buildWeatherDetail(
-                  'Min Temp', '5 °C', 'assets/icons/temperature.png'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(6, (index) {
+                // Sample hourly data, replace with actual data
+                final time =
+                    ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM'][index];
+                final temp = [18, 19, 24, 25, 26, 27][index];
+                final icon = Icons.wb_sunny;
 
-  Widget _buildWeatherDetail(String title, String value, String iconPath) {
-    return Row(
-      children: [
-        Image.asset(iconPath, scale: 8),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w300)),
-            Text(value,
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w300)),
-          ],
-        ),
-      ],
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Column(
+                    children: [
+                      Icon(icon, color: Colors.white, size: 40),
+                      const SizedBox(height: 5),
+                      Text(
+                        '$temp°',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        time,
+                        style: const TextStyle(color: Colors.white54),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

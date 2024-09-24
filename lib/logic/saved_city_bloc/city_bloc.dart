@@ -28,12 +28,9 @@ class CityService {
   }
 
   Future<List<City>> getCities() async {
-    final weatherDataList = await fetchCitiesFromAPI();
-    print('Fetched weather data list: $weatherDataList'); // Debug print
-    return weatherDataList.map((weatherData) => City(
-      name: weatherData.cityName,
-      weatherData: weatherData,
-    )).toList();
+    final cities = await fetchCitiesFromAPI();
+    print('Fetched cities: $cities'); // Debug print
+    return cities;
   }
 
   Future<void> deleteCityByName(String cityName) async {
