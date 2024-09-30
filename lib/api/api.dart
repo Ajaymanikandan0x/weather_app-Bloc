@@ -165,7 +165,7 @@ Future<void> saveCity(
 }
 
 Future<List<City>> fetchCitiesFromAPI() async {
-  final String url = '$baseUrl/getCities';
+  const String url = '$baseUrl/getCities';
 
   try {
     final response = await dio.get(url);
