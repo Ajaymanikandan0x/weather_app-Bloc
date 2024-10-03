@@ -2,14 +2,14 @@ name: Flutter CI + CD
 
 on:
   push: 
-    branches: [ main ]  
+    branches: [ master ]  
   pull_request:
-    branches: [ main ]  
+    branches: [ master ]  
   workflow_dispatch:   
 
 env:
   FLUTTER_CHANNEL: 'stable'        
-  FLUTTER_VERSION: '3.3.0'  # Specify a specific version of Flutter        
+  FLUTTER_VERSION: '3.24.3'          
   PATH_TO_AAB: 'build/app/outputs/bundle/release/app-release.aab'  
   ANDROID_PACKAGE_NAME: 'com.temp_tide.com' 
 
@@ -30,7 +30,7 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Install dependencies
-        run: flutter pub get
+        run: flutter pub get --verbose
 
       - name: Run Flutter analyze
         run: flutter analyze  
