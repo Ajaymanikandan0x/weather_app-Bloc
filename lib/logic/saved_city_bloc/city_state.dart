@@ -1,7 +1,6 @@
 import '../../file/city_data.dart';
 
 abstract class CityState {
-  @override
   List<Object> get props => [];
 }
 

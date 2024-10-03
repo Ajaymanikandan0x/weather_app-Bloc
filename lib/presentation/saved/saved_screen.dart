@@ -9,6 +9,8 @@ import '../../logic/saved_city_bloc/city_state.dart';
 import 'weather_details_screen.dart'; // Import the new weather details screen
 
 class SavedScreen extends StatelessWidget {
+  const SavedScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     // FetchCities event to load the saved cities
@@ -167,6 +169,14 @@ class SavedScreen extends StatelessWidget {
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              formattedDate,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.white70,
                                               ),
                                             ),
                                           ],

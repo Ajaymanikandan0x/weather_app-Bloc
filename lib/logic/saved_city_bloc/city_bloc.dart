@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../api/api.dart'; // Import the API functions
 import '../../file/city_data.dart';
@@ -50,7 +51,6 @@ class CityService {
           await getWeather(latLong[0]['lat'], latLong[0]['lng'], name);
       if (weatherData.isNotEmpty) {
         final latestWeather = weatherData.first;
-        print('Latest weather data: $latestWeather'); // Debug print
         await saveCity(
           name,
           latestWeather.time,
@@ -67,7 +67,9 @@ class CityService {
 
   Future<List<City>> getCities() async {
     final cities = await fetchCitiesFromAPI();
-    print('Fetched cities: $cities'); // Debug print
+    if (kDebugMode) {
+      print('Fetched cities: $cities');
+    } // Debug print
     return cities;
   }
 

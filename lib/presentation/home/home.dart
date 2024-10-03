@@ -37,7 +37,6 @@ class Home extends StatelessWidget {
                           style: TextStyle(color: Colors.white)));
                 }
                 final weatherData = state.weatherDataList.first;
-                print('Weather data: $weatherData');
                 return _buildWeatherContent(context, weatherData);
               }
               return const Center(
@@ -169,7 +168,9 @@ class Home extends StatelessWidget {
               ),
               onPressed: () {
                 if (isSaved) {
-                  context.read<CityBloc>().add(DeleteCityByName(weatherData.cityName));
+                  context
+                      .read<CityBloc>()
+                      .add(DeleteCityByName(weatherData.cityName));
                 } else {
                   context.read<CityBloc>().add(AddCity(weatherData.cityName));
                 }
@@ -200,7 +201,8 @@ class Home extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: List.generate(6, (index) {
-                final time = ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM'][index];
+                final time =
+                    ['9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM'][index];
                 final temp = [18, 19, 24, 25, 26, 27][index];
                 const icon = Icons.wb_sunny;
 
