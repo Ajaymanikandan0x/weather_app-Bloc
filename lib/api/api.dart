@@ -32,11 +32,7 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
         }).toList();
 
         return locations;
-      } else {
-        print('Place not found');
       }
-    } else {
-      print('Failed to get location, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching location data: $e');
@@ -119,8 +115,6 @@ Future<List<WeatherData>> getWeather(
         final int weatherCode = item['values']['weatherCode'];
         return WeatherData.fromJson(item, weatherCode, cityname);
       }).toList();
-    } else {
-      print('Failed to get weather data, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching weather data: $e');
@@ -156,8 +150,6 @@ Future<void> saveCity(
 
     if (response.statusCode == 200) {
       print('City saved successfully');
-    } else {
-      print('Failed to save city, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error saving city: $e');
@@ -188,11 +180,7 @@ Future<List<City>> fetchCitiesFromAPI() async {
             ),
           );
         }).toList();
-      } else {
-        print('No data found in the response');
       }
-    } else {
-      print('Failed to fetch cities, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error fetching cities: $e');
@@ -209,8 +197,6 @@ Future<void> deleteCityFromAPI(String cityName) async {
 
     if (response.statusCode == 200) {
       print('City deleted successfully');
-    } else {
-      print('Failed to delete city, status code: ${response.statusCode}');
     }
   } catch (e) {
     print('Error deleting city: $e');
