@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:temp_tide/api/api_key.dart';
-
+import 'package:flutter/foundation.dart';
 import '../file/city_data.dart';
 import '../file/weather_data/weatherdata.dart';
+import 'api_key.dart';
 
 final dio = Dio();
 
 Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
-  const String apiKey = apiKeyGeoLocate;
+  String apiKey = apiKeyGeoLocate;
   final String url =
       'https://api.opencagedata.com/geocode/v1/json?q=$place&key=$apiKey';
 
@@ -35,7 +35,9 @@ Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
       }
     }
   } catch (e) {
-    print('Error fetching location data: $e');
+    if (kDebugMode) {
+      print('Error fetching location data: $e');
+    }
   }
 
   return [];
@@ -99,7 +101,7 @@ String getWeatherType(int weatherCode) {
 
 Future<List<WeatherData>> getWeather(
     double lat, double lng, String cityname) async {
-  const String apiKey = apiKeyTomorrow;
+   String apiKey = apiKeyTomorrow;
   final String url =
       'https://api.tomorrow.io/v4/weather/forecast?location=$lat,$lng&apikey=$apiKey';
 
@@ -117,7 +119,9 @@ Future<List<WeatherData>> getWeather(
       }).toList();
     }
   } catch (e) {
-    print('Error fetching weather data: $e');
+    if (kDebugMode) {
+      print('Error fetching weather data: $e');
+    }
   }
 
   return [];
@@ -149,10 +153,14 @@ Future<void> saveCity(
     });
 
     if (response.statusCode == 200) {
-      print('City saved successfully');
+      if (kDebugMode) {
+        print('City saved successfully');
+      }
     }
   } catch (e) {
-    print('Error saving city: $e');
+    if (kDebugMode) {
+      print('Error saving city: $e');
+    }
   }
 }
 
@@ -183,7 +191,9 @@ Future<List<City>> fetchCitiesFromAPI() async {
       }
     }
   } catch (e) {
-    print('Error fetching cities: $e');
+    if (kDebugMode) {
+      print('Error fetching cities: $e');
+    }
   }
 
   return [];
@@ -196,9 +206,13 @@ Future<void> deleteCityFromAPI(String cityName) async {
     final response = await dio.delete(url);
 
     if (response.statusCode == 200) {
-      print('City deleted successfully');
+      if (kDebugMode) {
+        print('City deleted successfully');
+      }
     }
   } catch (e) {
-    print('Error deleting city: $e');
+    if (kDebugMode) {
+      print('Error deleting city: $e');
+    }
   }
 }

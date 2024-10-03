@@ -7,8 +7,7 @@ import '../../file/weather_data/weatherdata.dart';
 class WeatherDetailsScreen extends StatelessWidget {
   final WeatherData weatherData;
 
-  const WeatherDetailsScreen({Key? key, required this.weatherData})
-      : super(key: key);
+  const WeatherDetailsScreen({super.key, required this.weatherData});
 
   @override
   Widget build(BuildContext context) {
