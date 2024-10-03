@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:temp_tide/api/api_key.dart';
 import '../file/city_data.dart';
 import '../file/weather_data/weatherdata.dart';
+import 'api_key.dart';
 
 final dio = Dio();
 
@@ -165,7 +165,7 @@ Future<void> saveCity(
 }
 
 Future<List<City>> fetchCitiesFromAPI() async {
-  const String url = '$baseUrl/getCities';
+  const url = '$baseUrl/getCities';
 
   try {
     final response = await dio.get(url);
@@ -175,16 +175,16 @@ Future<List<City>> fetchCitiesFromAPI() async {
       if (data != null) {
         return data.map<City>((item) {
           return City(
-            name: item['name'],
+            name: item['name'] ?? '',
             weatherData: WeatherData(
-              cityName: item['name'],
-              temperature: item['temperature'].toDouble(),
-              weatherType: item['weatherType'],
-              time: item['datetime'],
-              visibility: item['visibility'].toDouble(),
-              windSpeed: item['windSpeed'].toDouble(),
-              humidity: item['humidity'].toDouble(),
-              imagePath: item['imagePath'],
+              cityName: item['name'] ?? '',
+              temperature: (item['temperature'] as num?)?.toDouble() ?? 0.0,
+              weatherType: item['weatherType'] ?? '',
+              time: item['datetime'] ?? '',
+              visibility: (item['visibility'] as num?)?.toDouble() ?? 0.0,
+              windSpeed: (item['windSpeed'] as num?)?.toDouble() ?? 0.0,
+              humidity: (item['humidity'] as num?)?.toDouble() ?? 0.0,
+              imagePath: item['imagePath'] ?? '',
             ),
           );
         }).toList();
