@@ -22,6 +22,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Create api_key.dart with API Keys
+        run: |
+          cat << EOF > lib/api/api_key.dart
+          const String apiKeyGeoLocate = '${{ secrets.API_KEY_GEO_LOCATE }}';
+          const String apiKeyTomorrow = '${{ secrets.API_KEY_TOMORROW }}';
+          // Add more API keys here as needed
+          EOF
+        shell: bash
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
