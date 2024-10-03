@@ -9,7 +9,7 @@ on:
 
 env:
   FLUTTER_CHANNEL: 'stable'        
-  FLUTTER_VERSION: 'latest'        
+  FLUTTER_VERSION: '3.3.0'  # Specify a specific version of Flutter        
   PATH_TO_AAB: 'build/app/outputs/bundle/release/app-release.aab'  
   ANDROID_PACKAGE_NAME: 'com.temp_tide.com' 
 
