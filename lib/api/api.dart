@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+
 import '../file/city_data.dart';
 import '../file/weather_data/weatherdata.dart';
 import 'api_key.dart';
@@ -7,7 +8,9 @@ import 'api_key.dart';
 final dio = Dio();
 
 Future<List<Map<String, dynamic>>> getLatLongFromPlace(String place) async {
+
   const String apiKey = apiKeyGeoLocate; // Add 'const' here
+
   final String url =
       'https://api.opencagedata.com/geocode/v1/json?q=$place&key=$apiKey';
 
@@ -101,7 +104,9 @@ String getWeatherType(int weatherCode) {
 
 Future<List<WeatherData>> getWeather(
     double lat, double lng, String cityname) async {
+
   const String apiKey = apiKeyTomorrow; // Add 'const' here
+
   final String url =
       'https://api.tomorrow.io/v4/weather/forecast?location=$lat,$lng&apikey=$apiKey';
 
