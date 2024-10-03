@@ -1,0 +1,88 @@
+name: Flutter CI + CD
+
+on:
+  push: 
+    branches: [ main ]  
+  pull_request:
+    branches: [ main ]  
+  workflow_dispatch:   
+
+env:
+  FLUTTER_CHANNEL: 'stable'        
+  FLUTTER_VERSION: 'latest'        
+  PATH_TO_AAB: 'build/app/outputs/bundle/release/app-release.aab'  
+  ANDROID_PACKAGE_NAME: 'com.temp_tide.com' 
+
+jobs:
+  # Job 1: Code Analysis and Testing
+  code-analysis-and-testing:
+    name: Code Analysis and Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run Flutter analyze
+        run: flutter analyze  
+
+      - name: Run Flutter tests
+        run: flutter test  
+
+  # Job 2: Android CI/CD Pipeline
+  android:
+    name: Android CI/CD
+    needs: code-analysis-and-testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Prepare key.jks & key.properties files
+        env:
+          KEYSTORE_FILE_BASE64: ${{ secrets.KEYSTORE_FILE_BASE64 }}
+          KEY_PROPERTIES_FILE: ${{ secrets.KEY_PROPERTIES_FILE }}
+        run: |
+          echo "Converting key base64 string to a file"
+          echo "$KEYSTORE_FILE_BASE64" >> key.jks.base64
+          base64 --decode key.jks.base64 > key.jks
+
+          echo "Converting key.properties secret string to a file"
+          echo "$KEY_PROPERTIES_FILE" >> key.properties
+        working-directory: 'android/'
+       
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Build Android App Bundle (AAB)
+        run: |
+          flutter build appbundle --release
+
+          echo "Removing signing files for extra security"
+          rm android/key.*
+
+      - name: Upload AAB as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-aab
+          path: ${{ env.PATH_TO_AAB }}
+
+      - name: Upload AAB to Google Play (Internal Track)
+        run: |
+          fastlane supply --aab ${{ env.PATH_TO_AAB }} \
+          --json_key_data '${{ secrets.ANDROID_SERVICE_ACCOUNT_JSON }}' \
+          --package_name '${{ env.ANDROID_PACKAGE_NAME }}' \
+          --track 'internal'  # Specify the Play Store track (e.g., 'internal', 'alpha', 'beta', 'production')
