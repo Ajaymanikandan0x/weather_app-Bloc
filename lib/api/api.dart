@@ -105,7 +105,8 @@ String getWeatherType(int weatherCode) {
 Future<List<WeatherData>> getWeather(
     double lat, double lng, String cityname) async {
 
-  const String apiKey = apiKeyTomorrow; // Add 'const' here
+  const String apiKey = apiKeyTomorrow; 
+
 
   final String url =
       'https://api.tomorrow.io/v4/weather/forecast?location=$lat,$lng&apikey=$apiKey';
@@ -170,7 +171,7 @@ Future<void> saveCity(
 }
 
 Future<List<City>> fetchCitiesFromAPI() async {
-  const url = '$baseUrl/getCities';
+  const String url = '$baseUrl/getCities'; 
 
   try {
     final response = await dio.get(url);
