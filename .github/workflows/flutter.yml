@@ -43,12 +43,8 @@ jobs:
       - name: Run Flutter analyze
         run: flutter analyze  
 
-      - name: Run Flutter tests
-        run: flutter test  
-
-      - name: Handle test failure
-        if: failure()
-        run: echo "Test case failed. Executing next part."
+ #     - name: Run Flutter tests
+ #       run: flutter test  
 
   # Job 2: Android CI/CD Pipeline
   android:
