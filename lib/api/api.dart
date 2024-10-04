@@ -138,7 +138,8 @@ Future<void> saveCity(
     double visibility,
     String weatherType,
     String imagePath) async {
-  final String url = '$baseUrl/addCity';
+      
+  const String url = '$baseUrl/addCity';
 
   try {
     final response = await dio.post(url, data: {
@@ -165,7 +166,7 @@ Future<void> saveCity(
 }
 
 Future<List<City>> fetchCitiesFromAPI() async {
-  const String url = '$baseUrl/getCities'; // Change 'final' to 'const'
+  const String url = '$baseUrl/getCities'; 
 
   try {
     final response = await dio.get(url);
