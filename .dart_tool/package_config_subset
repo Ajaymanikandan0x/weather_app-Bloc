@@ -94,6 +94,10 @@ flutter_bloc
 2.12
 file:///home/ajay_/.pub-cache/hosted/pub.dev/flutter_bloc-8.1.6/
 file:///home/ajay_/.pub-cache/hosted/pub.dev/flutter_bloc-8.1.6/lib/
+flutter_lints
+2.19
+file:///home/ajay_/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3/
+file:///home/ajay_/.pub-cache/hosted/pub.dev/flutter_lints-2.0.3/lib/
 glob
 2.19
 file:///home/ajay_/.pub-cache/hosted/pub.dev/glob-2.1.2/
@@ -126,6 +130,10 @@ leak_tracker_testing
 3.2
 file:///home/ajay_/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.1/
 file:///home/ajay_/.pub-cache/hosted/pub.dev/leak_tracker_testing-3.0.1/lib/
+lints
+3.0
+file:///home/ajay_/.pub-cache/hosted/pub.dev/lints-2.1.1/
+file:///home/ajay_/.pub-cache/hosted/pub.dev/lints-2.1.1/lib/
 logging
 2.19
 file:///home/ajay_/.pub-cache/hosted/pub.dev/logging-1.2.0/
