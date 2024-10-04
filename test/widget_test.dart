@@ -53,15 +53,13 @@ void main() {
     ));
 
     // Mock any other necessary methods on mockCityService
-    // For example, if your CityBloc uses methods from CityService, mock them here
     when(mockCityService.getCities()).thenAnswer((_) async => []);
 
-    // Provide necessary blocs for the app, injecting the mock Dio and CityService
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
           BlocProvider<WeatherBloc>(
-            create: (context) => WeatherBloc(),
+            create: (context) => WeatherBloc(dio: mockDio),
           ),
           BlocProvider<CityBloc>(
             create: (context) => CityBloc(mockCityService),
