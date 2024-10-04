@@ -18,7 +18,7 @@ void main() {
 
     // Define the URL used in the API call
     const String url = 'https://api.opencagedata.com/geocode/v1/json?q=Kochi&key=$apiKeyGeoLocate';
-    final String url2 = 'https://api.tomorrow.io/v4/weather/forecast?location=9.9312,76.2673&apikey=$apiKeyTomorrow';
+    const String url2 = 'https://api.tomorrow.io/v4/weather/forecast?location=9.9312,76.2673&apikey=$apiKeyTomorrow';
 
     // Set up the mock response for location
     when(mockDio.get(url)).thenAnswer((_) async => Response(
