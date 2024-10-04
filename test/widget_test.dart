@@ -1,30 +1,80 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:mockito/mockito.dart';
+import 'package:temp_tide/api/api_key.dart';
 import 'package:temp_tide/main.dart';
+import 'package:temp_tide/logic/current_weather/weather_bloc.dart';
+import 'package:temp_tide/logic/saved_city_bloc/city_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class MockDio extends Mock implements Dio {}
+class MockCityService extends Mock implements CityService {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Weather app displays city name', (WidgetTester tester) async {
+    // Create a mock Dio and CityService
+    final mockDio = MockDio();
+    final mockCityService = MockCityService();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Define the URL used in the API call
+    const String url = 'https://api.opencagedata.com/geocode/v1/json?q=Kochi&key=$apiKeyGeoLocate';
+    final String url2 = 'https://api.tomorrow.io/v4/weather/forecast?location=9.9312,76.2673&apikey=$apiKeyTomorrow';
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Set up the mock response for location
+    when(mockDio.get(url)).thenAnswer((_) async => Response(
+      data: {
+        'results': [
+          {
+            'formatted': 'Kochi, India',
+            'geometry': {'lat': 9.9312, 'lng': 76.2673},
+            'components': {'city': 'Kochi', 'country': 'India'}
+          }
+        ]
+      },
+      statusCode: 200,
+      requestOptions: RequestOptions(path: url),
+    ));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Set up the mock response for weather
+    when(mockDio.get(url2)).thenAnswer((_) async => Response(
+      data: {
+        'timelines': {
+          'minutely': [
+            {
+              'values': {
+                'weatherCode': 1000,
+              }
+            }
+          ]
+        }
+      },
+      statusCode: 200,
+      requestOptions: RequestOptions(path: url2),
+    ));
+
+    // Mock any other necessary methods on mockCityService
+    // For example, if your CityBloc uses methods from CityService, mock them here
+    when(mockCityService.getCities()).thenAnswer((_) async => []);
+
+    // Provide necessary blocs for the app, injecting the mock Dio and CityService
+    await tester.pumpWidget(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<WeatherBloc>(
+            create: (context) => WeatherBloc(),
+          ),
+          BlocProvider<CityBloc>(
+            create: (context) => CityBloc(mockCityService),
+          ),
+        ],
+        child: const MyApp(),
+      ),
+    );
+
+    // Wait for any asynchronous operations to complete.
+    await tester.pumpAndSettle();
+
+    // Check if the city name 'Kochi' is displayed
+    expect(find.text('Kochi'), findsOneWidget);
   });
 }
