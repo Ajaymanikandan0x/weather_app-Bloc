@@ -59,7 +59,7 @@ void main() {
       MultiBlocProvider(
         providers: [
           BlocProvider<WeatherBloc>(
-            create: (context) => WeatherBloc(dio: mockDio),
+            create: (context) => WeatherBloc(),
           ),
           BlocProvider<CityBloc>(
             create: (context) => CityBloc(mockCityService),
