@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         // home: Home(),
         routes: {
           '/': (context) => Home(),
-          '/saved': (context) => SavedScreen(),
+          '/saved': (context) => const SavedScreen(),
         },
       ),
     );
